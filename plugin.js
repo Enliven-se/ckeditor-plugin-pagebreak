@@ -31,7 +31,7 @@
 				).replace( /;/g, ' !important;' ); // Increase specificity to override other styles, e.g. block outline.
 
 			// Add the style that renders our placeholder.
-			CKEDITOR.addCss( 'div.cke_pagebreak{' + cssStyles + '}' );
+			CKEDITOR.addCss( 'div.page-break-after{' + cssStyles + '}' );
 		},
 
 		init: function( editor ) {
@@ -52,7 +52,7 @@
 			CKEDITOR.env.webkit && editor.on( 'contentDom', function() {
 				editor.document.on( 'click', function( evt ) {
 					var target = evt.data.getTarget();
-					if ( target.is( 'div' ) && target.hasClass( 'cke_pagebreak' ) )
+					if ( target.is( 'div' ) && target.hasClass( 'page-break-after' ) )
 						editor.getSelection().selectElement( target );
 				} );
 			} );
@@ -63,7 +63,7 @@
 			var dataProcessor = editor.dataProcessor,
 				dataFilter = dataProcessor && dataProcessor.dataFilter,
 				htmlFilter = dataProcessor && dataProcessor.htmlFilter,
-				styleRegex = /page-break-after\s*:\s*always/i,
+				classRegex = /page-break-after/i,
 				childStyleRegex = /display\s*:\s*none/i;
 
 			function upcastPageBreak( element ) {
@@ -76,16 +76,14 @@
 				htmlFilter.addRules( {
 					attributes: {
 						'class': function( value, element ) {
-							var className = value.replace( 'cke_pagebreak', '' );
-							if ( className != value ) {
-								var span = CKEDITOR.htmlParser.fragment.fromHtml( '<span style="display: none;">&nbsp;</span>' ).children[ 0 ];
-								element.children.length = 0;
-								element.add( span );
-								var attrs = element.attributes;
-								delete attrs[ 'aria-label' ];
-								delete attrs.contenteditable;
-								delete attrs.title;
-							}
+							var className = value;
+							var span = CKEDITOR.htmlParser.fragment.fromHtml( '<span style="display: none;">&nbsp;</span>' ).children[ 0 ];
+							element.children.length = 0;
+							element.add( span );
+							var attrs = element.attributes;
+							delete attrs[ 'aria-label' ];
+							delete attrs.contenteditable;
+							delete attrs.title;
 							return className;
 						}
 					}
@@ -105,7 +103,7 @@
 
 							// Check for "data form" of the pagebreak. If both element and
 							// descendants match, convert them to internal form.
-							else if ( styleRegex.test( element.attributes.style ) ) {
+							else if ( classRegex.test( element.attributes['class'] ) ) {
 								var child = element.children[ 0 ];
 
 								if ( child && child.name == 'span' && childStyleRegex.test( child.attributes.style ) )
@@ -131,12 +129,12 @@
 		context: 'div',
 		allowedContent: {
 			div: {
-				styles: '!page-break-after'
+				classes: '!page-break-after'
 			},
 			span: {
 				match: function( element ) {
 					var parent = element.parent;
-					return parent && parent.name == 'div' && parent.styles && parent.styles[ 'page-break-after' ];
+					return parent && parent.name == 'div' && parent.classes && parent.classes[ 'page-break-after' ];
 				},
 				styles: 'display'
 			}
@@ -149,11 +147,10 @@
 	function attributesSet( label ) {
 		return {
 			'aria-label': label,
-			'class': 'cke_pagebreak',
+			'class': 'page-break-after',
 			contenteditable: 'false',
 			'data-cke-display-name': 'pagebreak',
 			'data-cke-pagebreak': 1,
-			style: 'page-break-after: always',
 			title: label
 		};
 	}
