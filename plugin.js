@@ -77,13 +77,16 @@
 					attributes: {
 						'class': function( value, element ) {
 							var className = value;
-							var span = CKEDITOR.htmlParser.fragment.fromHtml( '<span style="display: none;">&nbsp;</span>' ).children[ 0 ];
-							element.children.length = 0;
-							element.add( span );
-							var attrs = element.attributes;
-							delete attrs[ 'aria-label' ];
-							delete attrs.contenteditable;
-							delete attrs.title;
+							if (className.indexOf('page-break-after') > -1) {
+								var span = CKEDITOR.htmlParser.fragment.fromHtml( '<span style="display: none;">&nbsp;</span>' ).children[ 0 ];
+								element.children.length = 0;
+								element.add( span );
+								var attrs = element.attributes;
+								delete attrs[ 'aria-label' ];
+								delete attrs.contenteditable;
+								delete attrs.title;
+							}
+
 							return className;
 						}
 					}
